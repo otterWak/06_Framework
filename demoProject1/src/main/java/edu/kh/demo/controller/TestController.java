@@ -41,7 +41,8 @@ public class TestController {
 	
 	/*
 	@RequestMapping("/todo")
-	public String 클래스명{
+	public class 클래스명{
+	
 		@RequestMapping("/insert") // /todo/insert 매핑
 		public String 메서드명() {}
 		
@@ -50,6 +51,7 @@ public class TestController {
 		
 		@RequestMapping("/update") // /todo/update 매핑
 		public String 메서드명() {}
+		
 	}
 	*/
 	
