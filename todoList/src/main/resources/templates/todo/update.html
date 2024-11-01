@@ -11,10 +11,10 @@
   <h1 th:text="|${todo.todoTitle} 수정|">할 일 수정</h1>
   <hr>
 
-  <form action="/todo/update" method="POST">
+  <form action="/todo/update" method="POST" id="addForm">
     <div class="form-group">
       <label for="todoTitle">제목 :</label>
-      <input type="text" id="todoTitle" name="todoTitle" placeholder="제목 입력">
+      <input type="text" id="todoTitle" name="todoTitle" placeholder="제목 입력" >
     </div>
 
     <div class="form-group">

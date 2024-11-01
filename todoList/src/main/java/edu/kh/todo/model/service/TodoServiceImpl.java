@@ -99,12 +99,18 @@ public class TodoServiceImpl implements TodoService{
 	}
 
 	
+	/** 업데이트 GET 요청
+	 *
+	 */
 	@Override
 	public Todo todoUpdate(int todoNo) {
 		return mapper.todoUpdate(todoNo);
 	}
 	
 
+	/** 업데이트 POST 요청
+	 *
+	 */
 	@Override
 	public int updateSubmit(int todoNo, String todoTitle, String todoContent) {
 		Todo todo = new Todo();
@@ -119,6 +125,9 @@ public class TodoServiceImpl implements TodoService{
 	}
 	
 	
+	/** 할 일 삭제
+	 *
+	 */
 	@Override
 	public int todoDelete(int todoNo) {
 		return mapper.todoDelete(todoNo);
