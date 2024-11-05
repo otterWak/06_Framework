@@ -109,6 +109,10 @@ public interface TodoMapper {
 
 
 
+	int ajaxUpdate(Todo todo);
+
+
+
 
 
 

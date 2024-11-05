@@ -82,5 +82,8 @@ public interface TodoService {
 	List<Todo> selectList();
 
 
+	int ajaxUpdate(Todo todo);
+
+
 
 }

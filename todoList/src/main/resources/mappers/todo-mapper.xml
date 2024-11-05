@@ -134,6 +134,12 @@
   </select>
   
   
+  <update id="ajaxUpdate" parameterType="Todo">
+  	UPDATE TB_TODO SET
+  	TODO_TITLE = #{todoTitle},
+  	TODO_CONTENT = #{todoContent}
+  	WHERE TODO_NO = ${todoNo}
+  </update>
   
   
   

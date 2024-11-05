@@ -157,5 +157,10 @@ public class TodoServiceImpl implements TodoService{
 		return mapper.selectAll();
 	}
 	
+	@Override
+	public int ajaxUpdate(Todo todo) {
+		return mapper.ajaxUpdate(todo);
+	}
+	
 	
 }
