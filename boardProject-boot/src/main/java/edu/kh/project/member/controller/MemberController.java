@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -147,7 +148,65 @@ public class MemberController {
 	}
 	
 	
+	/** 닉네임 중복 검사
+	 * @param memberNickname
+	 * @return 중복 1, 아님 0
+	 */
+	@ResponseBody
+	@GetMapping("checkNickname")
+	public int checkNickname(@RequestParam("memberNickname") String memberNickname) {
+		return service.checkNickname(memberNickname);
+	}
 	
+	
+	/** 회원 가입
+	 * @param inputMember : 입력된 회원 정보(memberEmail, memberPw, memberNickname,
+	 * 						memberTel, (memberAddress - 따로 배열로 받아서 처리) )
+	 * @param memberAddress : 입력한 주소 input 3개의 값을 배열로 전달
+	 * 						  [ 우편번호, 도로명/지번주소, 상세주소 ]
+	 * @param ra : 리다이렉트 시 request scope로 데이터 전달하는 객체
+	 * @return
+	 */
+	@PostMapping("signup")
+	public String signup(/*@ModelAttribute*/ Member inputMember,
+						 @RequestParam("memberAddress") String[] memberAddress,
+						 RedirectAttributes ra) {
+		
+		// log.debug("inputMember : "+inputMember);
+		/* inputMember : Member(memberNo=0, memberEmail=erichonggu@gmail.com, 
+		 * memberPw=123qwe, memberNickname=켈칼, memberTel=01011111111, 
+		 * memberAddress=13829,경기 과천시 대공원광장로 102,
+		 * 대공원 호랑이 우리, profileImg=null, enrollDate=null, 
+		 * memberDelFl=null, authority=0)
+		 * 
+		 * 주소 : ','로 구분자를 쓰기 적합하지 않음
+		 *        상세 주소에 기입 할 수 있기 때문
+		 *        따라서, ^^^ 등 안 쓸 만한 것으로 바꿔줘야 됨
+		 * */
+		
+		// 회원가입 서비스 호출
+		int result = service.signup(inputMember, memberAddress);
+		
+		String path = null;
+		String message = null;
+		
+		if(result > 0) { // 성공 시
+			message = inputMember.getMemberNickname() + "님의 가입을 환영합니다";
+			path = "/";
+					
+		} else { // 실패
+			message = "회원 가입 실패...";
+			path = "signup";
+		}
+		
+		ra.addFlashAttribute("message", message);
+		
+		return "redirect:" + path;
+		// 성공 -> redirect:/
+		// 실패 -> redirect:signup (상대경로)
+		//		   현재 주소 /member/signup (GET 방식 요청)
+		
+	}
 	
 	
 	

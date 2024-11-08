@@ -33,7 +33,7 @@ public class MemberServiceImpl implements MemberService{
 		// log.debug("bcryptPassword : " + bcryptPassword);
 		
 		// bcrypt.matches(평문, 암호화) : 평문과 암호화가 일치하면 true, 아니면 false
-		//boolean result = bcrypt.matches(inputMember.getMemberPw(), bcryptPassword);
+		// boolean result = bcrypt.matches(inputMember.getMemberPw(), bcryptPassword);
 		
 		//log.debug("result : " + result);
 		
@@ -62,6 +62,54 @@ public class MemberServiceImpl implements MemberService{
 	@Override
 	public int checkEmail(String memberEmail) {
 		return mapper.checkEmail(memberEmail);
+	}
+	
+	
+	// 닉네임 중복검사 서비스
+	@Override
+	public int checkNickname(String memberNickname) {
+		return mapper.checkNickname(memberNickname);
+	}
+	
+	
+	// 회원 가입 서비스
+	@Override
+	public int signup(Member inputMember, String[] memberAddress) {
+		
+		// 주소가 입력되지 않으면
+		// inputMember.getMemberAddress(0 -> ",,")
+		// memberAddress -> [,,]
+		
+		// 주소가 입력된 경우
+		if( !inputMember.getMemberAddress().equals(",,")) {
+			
+			// String.join("구분자", 배열)
+			// -> 배열의 모든 요소 사이에 "구분자"를 추가하여
+			//	  하나의 문자열로 만들어 반환하는 메서드
+			String address = String.join("^^^", memberAddress);
+			// [13289, 경기 과천시 대공원광장로 102, 대공원 호랑이 우리]
+			// 13829^^^경기 과천시 대공원광장로 102^^^대공원 호랑이 우리
+			
+			// 구분자로 "^^^" 쓴 이유 :
+			// -> 주소, 상세주소에 없는 특수문자 작성
+			// -> 나중에 마이페이지에서 주소 부분 수정시 다시 3분할 해야할 때
+			//	  구분자로 이용할 예정
+			
+			// inputMemebr 주소로 합쳐진 주소를 세팅
+			inputMember.setMemberAddress(address);
+			
+		}else {
+			// 주소가 입력되지 않은 경우
+			inputMember.setMemberAddress(null);
+		}
+		
+		// inputMember 안의 memberPw -> 평문
+		// 비밀번호를 암호화하여 inputMember에 세팅
+		String encPw = bcrypt.encode(inputMember.getMemberPw());
+		inputMember.setMemberPw(encPw);
+		
+		// 회원 가입 매퍼 메서드 호출
+		return mapper.signup(inputMember);
 	}
 	
 	
