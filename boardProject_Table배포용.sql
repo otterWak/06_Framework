@@ -80,6 +80,14 @@ FROM "MEMBER"
 WHERE MEMBER_NICKNAME = '우왁굳'
 AND MEMBER_NO != 2;
 
+SELECT MEMBER_PW
+FROM "MEMBER"
+WHERE MEMBER_NO = 2;
+
+UPDATE "MEMBER" SET
+MEMBER_DEL_FL = 'N'
+WHERE MEMBER_NO = 1;
+
 -----------------------------------------
 
 /* 이메일, 인증키 저장 테이블 생성 */

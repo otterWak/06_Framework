@@ -1,5 +1,7 @@
 package edu.kh.project.myPage.controller;
 
+import java.util.Map;
+
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -7,7 +9,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.SessionAttribute;
+import org.springframework.web.bind.annotation.SessionAttributes;
+import org.springframework.web.bind.support.SessionStatus;
 import org.springframework.web.context.annotation.SessionScope;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import edu.kh.project.member.model.dto.Member;
@@ -16,6 +21,13 @@ import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+
+/*
+ * @SessionAttributes의 역할
+ * - Model에 추가된 속성 중 key값이 일치하는 속성을 session scope로 변경
+ * - SessionStatus 이용 시 session에 등록된 완료할 대상을 찾는 용도
+ * */
+@SessionAttributes({"loginMember"})
 @Controller
 @RequestMapping("myPage")
 @RequiredArgsConstructor
@@ -145,6 +157,147 @@ public class MyPageController {
 		
 		return "redirect:info";
 	}
+	
+	
+	/** 비밀번호 변경
+	 * @param paramMap : 모든 파라미터를 맵으로 저장
+	 * @param loginMember : 세션에 등록된 현재 로그인한 회원 정보
+	 * @param ra : 리다이렉트시 request scope로 메시지 전달 역할
+	 * @return
+	 */
+	@PostMapping("changePw") // /myPage/changePw POST 요청 매핑
+	public String changePw(@RequestParam Map<String, Object> paramMap,
+						   @SessionAttribute("loginMember") Member loginMember,
+						   RedirectAttributes ra) {
+		
+		
+		//log.debug("paramMap : " + paramMap);
+		// paramMap : {currentPw=123qwe, newPw=qwe123, newPwConfirm=qwe123}
+		//log.debug("loginMember : " + loginMember);
+		// loginMember : Member(memberNo=2, memberEmail=memory1261@naver.com,
+		// memberPw=null, memberNickname=우왁굳, memberTel=01077771111,
+		// memberAddress=13829^^^경기 과천시 막계동 159-1^^^왁물원, profileImg=null,
+		// enrollDate=2024년 11월 08일 11시 23분 08초, memberDelFl=null, authority=1)
+		
+		// 로그인한 회원 번호
+		int memberNo = loginMember.getMemberNo();
+		
+		// 현재 + 새(paramMap) + 회원 번호(memberNo)를 서비스로 전달
+		int result = service.changePw(paramMap, memberNo);
+		
+		String path = null;
+		String message = null;
+		
+		if(result > 0) {
+			// 변경 성공 시
+			// 메시지 "비밀번호가 변경 되었습니다";
+			// 리다이렉트 /myPage/info
+			message = "비밀번호가 변경 되었습니다";
+			path = "/myPage/info";
+		}else {
+			// 변경 실패 시
+			// 메시지 "현재 비밀번호가 일치하지 않습니다";
+			// 리다이렉트 /myPage/changePw
+			message = "현재 비밀번호가 일치하지 않습니다";
+			path = "/myPage/changePw";
+		}
+		
+		ra.addFlashAttribute("message", message);
+		
+		
+		return "redirect:" + path;
+		
+		
+	}
+	
+	
+	
+	/** 회원 탈퇴
+	 * @param memberPw : 입력 받은 비밀번호
+	 * @param loginMember : 로그인한 회원 정보(세션)
+	 * @param status : 세션 완료 용도의 객체
+	 * 				   -> @SessionAttributes로 등록된 세션을 완료
+	 * @param ra
+	 * @return
+	 */
+	@PostMapping("secession")
+	public String secession(@RequestParam("memberPw") String memberPw,
+							@SessionAttribute("loginMember") Member loginMember,
+							SessionStatus status,
+							RedirectAttributes ra) {
+		
+		// 로그인한 회원의 회원번호 꺼내기
+		int memberNo = loginMember.getMemberNo();
+		
+		// 서비스 호출 (입력받은 비밀번호, 로그인한 회원번호)
+		int result = service.secession(memberPw, memberNo);
+		
+		String message = null;
+		String path = null;
+		
+		if(result > 0) {
+			message = "탈퇴 되었습니다";
+			path = "/";
+			
+			status.setComplete(); // 세션 완료 시킴
+			
+		} else {
+			message = "비밀번호가 일치하지 않습니다";
+			path = "secession";
+		}
+		
+		ra.addFlashAttribute("message", message);
+		
+		// 탈퇴 성공 - redirect:/ (메인페이지 재요청)
+		// 탈퇴 실패 - redirect:secession(상대경로)
+		//			   -> /myPage/secession (현재경로)
+		//			   -> /myPage/secession (GET 요청)
+		return "redirect:"+path;
+	}
+	
+	
+	/*
+	 * Spring에서 파일 업로드를 처리하는 방법
+	 * 
+	 * - enctype = "multipart/form-data" 로 클라이언트 요청을 받으면
+	 * 	 (문자, 숫자, 파일 등이 섞여있는 요청)
+	 * 
+	 * 	 이를 MultipartResolver(FileConfig에 정의)를 이용해서 섞여있는 파라미터를 분리
+	 * 
+	 * 	 문자열, 숫자 -> String
+	 *   파일 		  -> MultipartFile
+	 * */
+	
+	/** 파일테스트 1
+	 * @param uploadFile : 업로드한 파일 + 파일에 대한 내용 및 설정 내용
+	 * @return
+	 */
+	@PostMapping("file/test1") // /myPage/file/test1 POST 요청 매핑
+	public String fileUpload1(@RequestParam("uploadFile") MultipartFile uploadFile,
+							  RedirectAttributes ra) throws Exception{
+		
+		String path = service.fileUpload1(uploadFile);
+		
+		// 파일이 저장되어 웹에서 접근할 수 있는 경로가 반화노디었을 때
+		if( path != null ) {
+			ra.addFlashAttribute("path", path);
+		}
+		
+		return "redirect:/myPage/fileTest";
+	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 	
 	
 	
