@@ -88,7 +88,7 @@ UPDATE "MEMBER" SET
 MEMBER_DEL_FL = 'N'
 WHERE MEMBER_NO = 1;
 
------------------------------------------
+-----------------------------------------------------------------------------------
 
 /* 이메일, 인증키 저장 테이블 생성 */
 CREATE TABLE "TB_AUTH_KEY"(
@@ -108,7 +108,7 @@ CREATE SEQUENCE SEQ_KEY_NO NOCACHE; -- 인증키 구분 번호 시퀀스
 
 SELECT * FROM "TB_AUTH_KEY";
 
-------------------------------------------
+------------------------------------------------------------------------------------
 
 
 -- 파일 
@@ -133,8 +133,19 @@ COMMENT ON COLUMN "UPLOAD_FILE"."FILE_UPLOAD_DATE" IS '업로드 날짜';
 
 COMMENT ON COLUMN "UPLOAD_FILE"."MEMBER_NO" IS '업로드한 회원 번호';
 
+CREATE SEQUENCE SEQ_FILE_NO NOCACHE;
 
-------------------------------------------
+SELECT  * FROM "UPLOAD_FILE";
+
+-- 파일 목록 조회
+SELECT FILE_NO, FILE_PATH , FILE_ORIGINAL_NAME , FILE_RENAME , MEMBER_NICKNAME,
+TO_CHAR(FILE_UPLOAD_DATE, 'YYYY-MM-DD') FILE_UPLOAD_DATE 
+FROM "UPLOAD_FILE"
+JOIN "MEMBER" ON ("UPLOAD_FILE".MEMBER_NO = "MEMBER".MEMBER_NO)
+WHERE "UPLOAD_FILE".MEMBER_NO = 2
+ORDER BY FILE_NO DESC;
+
+------------------------------------------------------------------------------------
 
 /* 게시판 테이블 생성 */
 CREATE TABLE "BOARD" (
@@ -240,11 +251,11 @@ COMMENT ON COLUMN "COMMENT"."PARENT_COMMENT_NO" IS '부모 댓글 번호';
 
 ALTER TABLE "MEMBER" ADD CONSTRAINT "PK_MEMBER" PRIMARY KEY (
 	"MEMBER_NO"
-);
+); -- 수행 함
 
 ALTER TABLE "UPLOAD_FILE" ADD CONSTRAINT "PK_UPLOAD_FILE" PRIMARY KEY (
 	"FILE_NO"
-);
+); -- 수행 함
 
 ALTER TABLE "BOARD" ADD CONSTRAINT "PK_BOARD" PRIMARY KEY (
 	"BOARD_NO"
