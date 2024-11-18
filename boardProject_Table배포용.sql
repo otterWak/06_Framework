@@ -507,7 +507,7 @@ GROUP BY BOARD_NO
 ORDER BY BOARD_NO;
 
 
-
+SELECT * FROM BOARD_IMG bi ;
 -----------------------------------------------------
 
 /* BOARD_IMG 테이블용 시퀀스 생성 */
@@ -515,27 +515,121 @@ CREATE SEQUENCE SEQ_IMG_NO NOCACHE;
 
 /* BOARD_IMG 테이블에 샘플 데이터 삽입 */
 INSERT INTO "BOARD_IMG" VALUES(
-	SEQ_IMG_NO.NEXTVAL, '/images/board/', '원본1.jpg', 'test1.jpg', 0, 1998
+	SEQ_IMG_NO.NEXTVAL, '/images/board/', '원본1.jpg', 'test1.jpg', 0, 2000
 );
 
 INSERT INTO "BOARD_IMG" VALUES(
-	SEQ_IMG_NO.NEXTVAL, '/images/board/', '원본2.jpg', 'test2.jpg', 1, 1998
+	SEQ_IMG_NO.NEXTVAL, '/images/board/', '원본2.jpg', 'test2.jpg', 1, 2000
 );
 
 INSERT INTO "BOARD_IMG" VALUES(
-	SEQ_IMG_NO.NEXTVAL, '/images/board/', '원본3.jpg', 'test3.jpg', 2, 1998
+	SEQ_IMG_NO.NEXTVAL, '/images/board/', '원본3.jpg', 'test3.jpg', 2, 2000
 );
 
 INSERT INTO "BOARD_IMG" VALUES(
-	SEQ_IMG_NO.NEXTVAL, '/images/board/', '원본4.jpg', 'test4.jpg', 3, 1998
+	SEQ_IMG_NO.NEXTVAL, '/images/board/', '원본4.jpg', 'test4.jpg', 3, 2000
 );
 
 INSERT INTO "BOARD_IMG" VALUES(
-	SEQ_IMG_NO.NEXTVAL, '/images/board/', '원본5.jpg', 'test5.jpg', 4, 1998
+	SEQ_IMG_NO.NEXTVAL, '/images/board/', '원본5.jpg', 'test5.jpg', 4, 2000
 );
 
 
 COMMIT;
+
+SELECT * FROM "BOARD_IMG";
+
+--게시글 상세 조회
+SELECT BOARD_NO, BOARD_TITLE, BOARD_CONTENT, BOARD_CODE, READ_COUNT,
+MEMBER_NO, MEMBER_NICKNAME, PROFILE_IMG,
+TO_CHAR(BOARD_WRITE_DATE, 'YYYY"년" MM"월" DD"일" HH24:MI:SS') BOARD_WRITE_DATE, 
+TO_CHAR(BOARD_UPDATE_DATE, 'YYYY"년" MM"월" DD"일" HH24:MI:SS') BOARD_UPDATE_DATE, 
+
+( SELECT COUNT(*) 
+FROM "BOARD_LIKE"
+WHERE BOARD_NO = 2000 ) LIKE_COUNT,
+
+( SELECT IMG_PATH || IMG_RENAME 
+FROM "BOARD_IMG"
+WHERE BOARD_NO = 2000
+AND IMG_ORDER = 0 ) THUMBNAIL,
+
+(SELECT COUNT(*)
+FROM "BOARD_LIKE"
+WHERE BOARD_NO = 2000
+) LIKE_CHECK
+
+FROM "BOARD"
+JOIN "MEMBER" USING(MEMBER_NO)
+WHERE BOARD_DEL_FL = 'N'
+AND BOARD_CODE = 1
+AND BOARD_NO = 2000;
+
+--해당 게시글의 이미지 목록 조회
+
+SELECT * FROM "BOARD_IMG"
+WHERE BOARD_NO = 2000
+ORDER BY IMG_ORDER;
+
+
+SELECT  * FROM "COMMENT"
+WHERE BOARD_NO = 2000;
+
+SELECT * FROM "MEMBER";
+
+--해당 게시글의 댓글 목록 조회
+INSERT INTO "COMMENT"	
+VALUES( SEQ_COMMENT_NO.NEXTVAL, '부모 댓글 1',
+			  DEFAULT, DEFAULT,	2000, 1, NULL);
+			 
+INSERT INTO "COMMENT"	
+VALUES( SEQ_COMMENT_NO.NEXTVAL, '부모 댓글 2',
+			  DEFAULT, DEFAULT,	2000, 1, NULL);
+			 
+INSERT INTO "COMMENT"	
+VALUES( SEQ_COMMENT_NO.NEXTVAL, '부모 댓글 3',
+			  DEFAULT, DEFAULT,	2000, 1, NULL);
+			 
+-- 부모 댓글 1의 자식 댓글
+INSERT INTO "COMMENT"	
+VALUES( SEQ_COMMENT_NO.NEXTVAL, '부모 1의 자식 1',
+			  DEFAULT, DEFAULT,	2000, 2, 2001);
+			 
+INSERT INTO "COMMENT"	
+VALUES( SEQ_COMMENT_NO.NEXTVAL, '부모 1의 자식 2',
+			  DEFAULT, DEFAULT,	2000, 2, 2001);
+			 
+			 
+-- 부모 댓글 2의 자식 댓글			 
+INSERT INTO "COMMENT"	
+VALUES( SEQ_COMMENT_NO.NEXTVAL, '부모 2의 자식 1',
+			  DEFAULT, DEFAULT,	2000, 2, 2002);
+			 
+-- 부모 댓글 2의 자식 1의 자식 댓글			 
+INSERT INTO "COMMENT"	
+VALUES( SEQ_COMMENT_NO.NEXTVAL, '부모 2의 자식 1의 자식!!!',
+			  DEFAULT, DEFAULT,	2000, 2, 2006);
+
+			 
+COMMIT;
+
+/*계층형 쿼리*/
+SELECT LEVEL, C.* FROM
+   (SELECT COMMENT_NO, COMMENT_CONTENT,
+       TO_CHAR(COMMENT_WRITE_DATE, 'YYYY"년" MM"월" DD"일" HH24"시" MI"분" SS"초"') COMMENT_WRITE_DATE,
+       BOARD_NO, MEMBER_NO, MEMBER_NICKNAME, PROFILE_IMG, PARENT_COMMENT_NO, COMMENT_DEL_FL
+   FROM "COMMENT"
+   JOIN MEMBER USING(MEMBER_NO)
+   WHERE BOARD_NO = 2000) C
+WHERE COMMENT_DEL_FL = 'N' --> 삭제되지않은댓글이거나
+OR 0 != (SELECT COUNT(*) FROM "COMMENT" SUB
+            WHERE SUB.PARENT_COMMENT_NO = C.COMMENT_NO
+            AND COMMENT_DEL_FL = 'N')
+            --> 삭제된 댓글이라도 그 아래에 활성 상태인 자식 댓글이 존재하면 조회
+START WITH PARENT_COMMENT_NO IS NULL
+CONNECT BY PRIOR COMMENT_NO = PARENT_COMMENT_NO
+ORDER SIBLINGS BY COMMENT_NO
+;
 
 
 -------------------------------------------------------
@@ -548,6 +642,17 @@ COMMIT;
 
 SELECT * FROM BOARD_LIKE;
 ----------------------------------------------------------
+
+INSERT INTO "BOARD_IMG" 
+(
+	SELECT NEXT_IMG_NO(), '경로1', '원본1', '변경1', 1, 2001 FROM DUAL
+	UNION 
+	SELECT NEXT_IMG_NO(), '경로2', '원본2', '변경2', 2, 2001 FROM DUAL
+	UNION 
+	SELECT NEXT_IMG_NO(), '경로3', '원본3', '변경3', 3, 2001 FROM DUAL
+);
+
+SELECT * FROM BOARD_IMG bi ;
 
 -- SEQ_IMG_NO 시퀀스의 다음 값을 반환하는 함수 생성
 
@@ -565,45 +670,7 @@ BEGIN
 	RETURN IMG_NO;
 END;
 -- 여기까지 긁기
-
-
-
-
-INSERT INTO "COMMENT"	
-VALUES( SEQ_COMMENT_NO.NEXTVAL, '부모 댓글 1',
-			  DEFAULT, DEFAULT,	2011, 2, NULL);
-			 
-INSERT INTO "COMMENT"	
-VALUES( SEQ_COMMENT_NO.NEXTVAL, '부모 댓글 2',
-			  DEFAULT, DEFAULT,	2011, 2, NULL);
-			 
-INSERT INTO "COMMENT"	
-VALUES( SEQ_COMMENT_NO.NEXTVAL, '부모 댓글 3',
-			  DEFAULT, DEFAULT,	2011, 2, NULL);
-			 
--- 부모 댓글 1의 자식 댓글
-INSERT INTO "COMMENT"	
-VALUES( SEQ_COMMENT_NO.NEXTVAL, '부모 1의 자식 1',
-			  DEFAULT, DEFAULT,	2011, 2, 4002);
-			 
-INSERT INTO "COMMENT"	
-VALUES( SEQ_COMMENT_NO.NEXTVAL, '부모 1의 자식 2',
-			  DEFAULT, DEFAULT,	2011, 2, 4002);
-			 
-			 
--- 부모 댓글 2의 자식 댓글			 
-INSERT INTO "COMMENT"	
-VALUES( SEQ_COMMENT_NO.NEXTVAL, '부모 2의 자식 1',
-			  DEFAULT, DEFAULT,	2011, 2, 4003);
-			 
--- 부모 댓글 2의 자식 1의 자식 댓글			 
-INSERT INTO "COMMENT"	
-VALUES( SEQ_COMMENT_NO.NEXTVAL, '부모 2의 자식 1의 자식!!!',
-			  DEFAULT, DEFAULT,	2011, 2, 4007);
-
-			 
-COMMIT;
-
+SELECT NEXT_IMG_NO() FROM DUAL;
 
 
 
