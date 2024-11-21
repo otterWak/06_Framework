@@ -150,14 +150,16 @@ form.addEventListener("submit", e => {
 	const input = document.createElement("input");
 
 	// Array.from() : Set -> Array로 변환
-	// 배열.toString() : [1,2,3] --> "1,2,3" 변환
+	// 배열.toString() : [1,2,3] --> "1,2,3" 변환 (SQL 문법에 사용하기 위함)
 	input.value = Array.from(deleteOrderList).toString();
 
 	console.log("삭제된 이미지 리스트 : " + input.value);
 
 	input.name = "deleteOrderList";
 	input.type = "hidden";
+	// <input type="hidden" name="deleteOrderList" value="1,2,3"/>
 
 	form.append(input); // 자식으로 input 추가
+
 
 })

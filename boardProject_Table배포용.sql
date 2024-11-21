@@ -567,6 +567,8 @@ AND BOARD_NO = 2000;
 
 --해당 게시글의 이미지 목록 조회
 
+SELECT * FROM "COMMENT" c ;
+
 SELECT * FROM "BOARD_IMG"
 WHERE BOARD_NO = 2000
 ORDER BY IMG_ORDER;
@@ -631,16 +633,19 @@ CONNECT BY PRIOR COMMENT_NO = PARENT_COMMENT_NO
 ORDER SIBLINGS BY COMMENT_NO
 ;
 
+SELECT * FROM BOARD_LIKE bl ;
 
 -------------------------------------------------------
 
 /* 좋아요 테이블(BOARD_LIKE) 샘플 데이터 추가 */
 INSERT INTO "BOARD_LIKE"
-VALUES(1, 1998); -- 1번 회원이 1998번 글에 좋아요를 클릭함
+VALUES(1, 2004); -- 1번 회원이 1998번 글에 좋아요를 클릭함
 
 COMMIT;
 
-SELECT * FROM BOARD_LIKE;
+SELECT * FROM BOARD_LIKE
+WHERE MEMBER_NO=1
+AND BOARD_NO = 2004;
 ----------------------------------------------------------
 
 INSERT INTO "BOARD_IMG" 
@@ -671,6 +676,8 @@ BEGIN
 END;
 -- 여기까지 긁기
 SELECT NEXT_IMG_NO() FROM DUAL;
+
+----------------------------------------------------------
 
 
 

@@ -150,6 +150,7 @@
 
         // - loginMember가 null 인 경우 null 반환
         const loginMemberNo = /*[[${session.loginMember?.memberNo}]]*/ "로그인 회원 번호";
+        // ? : 안전탐색 연산자. session의 loginMember가 있을수도 없을수도 있음
 
         // 현재 게시글 번호를 전역 변수로 저장
         const boardNo = /*[[${board.boardNo}]]*/ "게시글 번호";
