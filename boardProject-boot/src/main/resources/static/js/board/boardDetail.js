@@ -85,6 +85,8 @@ if(deleteBtn != null){
       return;
     }
 
+    // location.pathname : 호출 되고 있는 주소를 가져 옴
+    // /board/2/1997?cp=1
     const url = location.pathname.replace("board","editBoard") + "/delete"; // /editBoard/1/2000/delete
     const queryString = location.search; // ? cp=1
     location.href = url + queryString;
