@@ -52,7 +52,7 @@ VALUES(SEQ_MEMBER_NO.NEXTVAL,
 );
 
 COMMIT;
-
+SELECT * FROM BOARD_IMG bi ;
 SELECT * FROM "MEMBER";
 
 -- 회원 1번 유저일 암호화된 비밀번호로 업데이트(pass01!)
@@ -188,6 +188,7 @@ CREATE TABLE "BOARD_TYPE" (
 );
 
 SELECT * FROM BOARD_TYPE bt ;
+SELECT * FROM BOARD_IMG bi ;
 
 
 COMMENT ON COLUMN "BOARD_TYPE"."BOARD_CODE" IS '게시판 종류 코드 번호';
@@ -400,6 +401,7 @@ AND BOARD_CODE =3;
 CREATE SEQUENCE SEQ_BOARD_NO NOCACHE;  -- 여기까지 수행(11/14)
 
 SELECT * FROM BOARD ;
+SELECT * FROM BOARD_IMG bi ;
 
 /* 게시판(BOARD) 테이블 샘플 데이터 삽입(PL/SQL)*/
 SELECT * FROM "MEMBER"; -- 존재하는 회원 중 하나로 진행
@@ -496,7 +498,7 @@ END;
 
 COMMIT;
 
-
+SELECT * FROM BOARD_IMG;
 -- 게시글 번호 최소값, 최대값
 SELECT MIN(BOARD_NO), MAX(BOARD_NO) FROM "BOARD";
 

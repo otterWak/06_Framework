@@ -60,8 +60,8 @@
 						<!-- 게시글이 존재할 때 -->
 						<th:block th:unless="${#lists.isEmpty(boardList)}">
 							
-							<tr th:each="board, iterStat : ${boardList}" th:object="${board}">
-								<td th:text="*{boardNo}">게시글 번호</td>
+							<tr th:each="board : ${boardList}">
+								<td th:text="${board.boardNo}">게시글 번호</td>
 								
 								<td>
 									<!-- 썸네일 추가 예정 -->
@@ -73,27 +73,27 @@
 									<a 
 									th:unless="${param.key}"
 									th:href="@{/board/{boardCode}/{boardNo} (boardCode=${boardCode}, boardNo=*{boardNo}, cp=${pagination.currentPage})}"
-									th:text="*{boardTitle}">게시글 제목</a>
+									th:text="${board.boardTitle}">게시글 제목</a>
 		
 									<!-- 검색 O -->
 									<a th:if="${param.key}"
 									th:href="@{/board/{boardCode}/{boardNo} (boardCode=${boardCode}, boardNo=*{boardNo}, cp=${pagination.currentPage}, key=${param.key}, query=${param.query})}"
-									th:text="*{boardTitle}">게시글 제목</a>
+									th:text="${board.boardTitle}">게시글 제목</a>
 		
-									<th:block th:text="|[*{commentCount}]|">댓글 수</th:block>
+									<th:block th:text="|[${board.commentCount}]|">댓글 수</th:block>
 								</td>
 	
 								<!-- 작성자 닉네임 -->
-								<td th:text="*{memberNickname}">닉네임</td>
+								<td th:text="${board.memberNickname}">닉네임</td>
 	
 								<!-- 작성일 -->
-								<td th:text="*{boardWriteDate}">2023-10-26</td>
+								<td th:text="${board.boardWriteDate}">2023-10-26</td>
 	
 								<!-- 조회수 -->
-								<td th:text="*{readCount}">0</td>
+								<td th:text="${board.readCount}">0</td>
 	
 								<!-- 좋아요 수 -->
-								<td th:text="*{likeCount}">0</td>
+								<td th:text="${board.likeCount}">0</td>
 	
 							</tr>
 						</th:block>
